@@ -187,6 +187,27 @@ void pbitmap(int x, int y, Bitmap *address) {
         }
     }
 }
+void invertScreen() {
+    unsigned char *videoMemory = (unsigned char *)0xA0000;
+    int screenWidth = 320; // Largura da tela em pixels
+    int screenHeight = 200; // Altura da tela em pixels
+    int middleLine = screenHeight / 2; // Linha do meio (se ímpar, não se mexe)
+    
+    unsigned char temp;
+    
+    for (int y = 0; y < middleLine; y++) {
+        int topOffset = y * screenWidth;
+        int bottomOffset = (screenHeight - y - 1) * screenWidth;
+        
+        for (int x = 0; x < screenWidth; x++) {
+            // Troca os valores dos pixels de cima para baixo
+            temp = videoMemory[topOffset + x];
+            videoMemory[topOffset + x] = videoMemory[bottomOffset + x];
+            videoMemory[bottomOffset + x] = temp;
+        }
+    }
+}
+
  int kernel_main()
         {
 		Bitmap *bmp;
@@ -199,17 +220,19 @@ void pbitmap(int x, int y, Bitmap *address) {
 		NULL=0;
 		
 		memoryStart = (unsigned char *)0x200000;
-		for (n=0;n<280;n=n+8)   
+		for (n=0;n<150;n=n+8)   
 			hline(0,n,319,0);
 		for (n=0;n<300;n=n+8)   
 			vline(n,0,199,0);
 		box(150,75,175,100,0);	   	
-		invertScreenRightToLeft();
+		
 		bmp=createBitmap(x,y);
 		addr=(unsigned char*)bmp->data;
 		
 		memfill(addr,x*y,9);
-		pbitmap(3,3,bmp) ;  
+		pbitmap(3,3,bmp) ;
+		invertScreen(); 
+		invertScreenRightToLeft(); 
 		return 0;	  
         }
  
